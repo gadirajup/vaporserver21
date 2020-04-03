@@ -1,39 +1,30 @@
 //
-//  MessageHandler.swift
+//  MessageController.swift
 //  App
 //
 //  Created by Prudhvi Gadiraju on 4/2/20.
 //
 
 import Foundation
-import shared
+//import shared
 import Vapor
 
-struct MessageHandler {
+struct MessageController{
     
     enum MessageError: Error {
         case UnknownMessage
     }
     
     static func process(_ message: Message, with socket: WebSocket) throws {
-                switch message.type {
-        case .join:
-            guard let player = message.player else {
-                return print("missing player in join message")
-            }
-            
-            //try Game.shared.handleJoin(player: player, socket: socket)
-        case .hit:
-            guard let player = message.player else {
-                return print("missing player in hit message")
-            }
-            
-            //try Game.shared.handleHit(player: player)
-        case .stand:
-                    print("Stand")
-            //try Game.shared.handleTurn()
-        default:
-            throw MessageError.UnknownMessage
+        switch message.type {
+        case .join  : try GamesController.standard.handleJoin(with: message, and: socket)
+        case .hit   : try GamesController.standard.handleHit(with: message)
+        case .stand : try GamesController.standard.handleStand(with: message)
+        default     : throw MessageError.UnknownMessage
         }
+    }
+    
+    static func processClose(_ socket: WebSocket) throws {
+        try GamesController.standard.handleClose(socket)
     }
 }
